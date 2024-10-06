@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <title>Snake </title>
+    <title>Snake</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -79,6 +80,7 @@
     </style>
 </head>
 <body>
+<img src="snake-qr.png" alt="Snake QR Code" style="position: absolute; top: 0; right: 0; width: 100px; height: 100px;"/>
 <div class="animated-box in">
     <canvas height="500" width="500" id="snake"></canvas>
 </div>
@@ -100,14 +102,12 @@
     const xMax = canvasWidth * RATIO
     const yMax = canvasHeight * RATIO
 
-    // if (RATIO > 1) {
     canvas.width = xMax
     canvas.height = yMax
     canvas.style.width = canvasWidth + 'px'
     canvas.style.height = canvasHeight + 'px'
 
     ctx.scale(RATIO, RATIO)
-    // }
 
     const directions = ['top', 'bottom', 'left', 'right']
     let direction = directions[Math.floor(Math.random() * directions.length)]
