@@ -2,101 +2,211 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <title>Snake</title>
+    <title>Snake </title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
 
     <style>
         body {
-            background: chocolate;
+            background: #2c2c2c;
             height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
         }
 
         canvas {
-            border: 1px solid #000;
+            background: #000;
+            border-radius: 4px;
+        }
+
+        .animated-box {
+            position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .animated-box:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 4px;
+            background: linear-gradient(120deg, #00F260, #0575E6, #00F260);
+            background-size: 300% 300%;
+            clip-path: polygon(0% 100%, 3px 100%, 3px 3px, calc(100% - 3px) 3px, calc(100% - 3px) calc(100% - 3px), 3px calc(100% - 3px), 3px 100%, 100% 100%, 100% 0%, 0% 0%);
+        }
+
+        .animated-box.in:after {
+            animation: frame-enter 1s forwards ease-in-out reverse, gradient-animation 4s ease-in-out infinite;
+        }
+
+        /* motion */
+        @keyframes gradient-animation {
+            0% {
+                background-position: 15% 0%;
+            }
+            50% {
+                background-position: 85% 100%;
+            }
+            100% {
+                background-position: 15% 0%;
+            }
+        }
+
+        @keyframes frame-enter {
+            0% {
+                clip-path: polygon(0% 100%, 3px 100%, 3px 3px, calc(100% - 3px) 3px, calc(100% - 3px) calc(100% - 3px), 3px calc(100% - 3px), 3px 100%, 100% 100%, 100% 0%, 0% 0%);
+            }
+            25% {
+                clip-path: polygon(0% 100%, 3px 100%, 3px 3px, calc(100% - 3px) 3px, calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) 100%, 100% 100%, 100% 0%, 0% 0%);
+            }
+            50% {
+                clip-path: polygon(0% 100%, 3px 100%, 3px 3px, calc(100% - 3px) 3px, calc(100% - 3px) 3px, calc(100% - 3px) 3px, calc(100% - 3px) 3px, calc(100% - 3px) 3px, 100% 0%, 0% 0%);
+            }
+            75% {
+                -webkit-clip-path: polygon(0% 100%, 3px 100%, 3px 3px, 3px 3px, 3px 3px, 3px 3px, 3px 3px, 3px 3px, 3px 0%, 0% 0%);
+            }
+            100% {
+                -webkit-clip-path: polygon(0% 100%, 3px 100%, 3px 100%, 3px 100%, 3px 100%, 3px 100%, 3px 100%, 3px 100%, 3px 100%, 0% 100%);
+            }
         }
     </style>
 </head>
 <body>
-<canvas height="300" id="snake" width="300"></canvas>
+<div class="animated-box in">
+    <canvas height="500" width="500" id="snake"></canvas>
+</div>
 
 <div id="debug"></div>
 <script>
     const canvas = document.getElementById('snake')
     const ctx = canvas.getContext('2d')
 
-    const ratio = 1 //window.devicePixelRatio;
-    let canvasWidth = canvas.width
-    let canvasHeight = canvas.height
+    /* BLOCK VARIABLES */
+    const SPEED = 500
+    const SNAKE_SIZE = 50
+    const WINDOW_SIZE = 500
+    const RATIO = 2 //window.devicePixelRatio;
 
-    const xMax = canvasWidth * ratio
-    const yMax = canvasHeight * ratio
+    const canvasWidth = WINDOW_SIZE
+    const canvasHeight = WINDOW_SIZE
 
-    if (ratio > 1) {
-        canvas.width = xMax
-        canvas.height = yMax
-        canvas.style.width = canvasWidth + 'px'
-        canvas.style.height = canvasHeight + 'px'
+    const xMax = canvasWidth * RATIO
+    const yMax = canvasHeight * RATIO
 
-        ctx.scale(ratio, ratio)
-    }
+    // if (RATIO > 1) {
+    canvas.width = xMax
+    canvas.height = yMax
+    canvas.style.width = canvasWidth + 'px'
+    canvas.style.height = canvasHeight + 'px'
 
-    const snakeSize = 10
-    const snakeSpace = 0
+    ctx.scale(RATIO, RATIO)
+    // }
 
     const directions = ['top', 'bottom', 'left', 'right']
-    const direction = directions[Math.floor(Math.random() * directions.length)]
+    let direction = directions[Math.floor(Math.random() * directions.length)]
+
+    document.onkeydown = function (e) {
+        e.preventDefault()
+        switch (e.keyCode) {
+            case 37:
+                direction = 'left'
+                break
+            case 38:
+                direction = 'top'
+                break
+            case 39:
+                direction = 'right'
+                break
+            case 40:
+                direction = 'bottom'
+                break
+        }
+    }
+
+    const allX = Array.from({length: xMax / RATIO / SNAKE_SIZE}, (_, i) => i * SNAKE_SIZE)
+    const allY = Array.from({length: yMax / RATIO / SNAKE_SIZE}, (_, i) => i * SNAKE_SIZE)
+
+    console.log(allX, allY)
+    const snakeStartX = allX[Math.floor(Math.random() * allX.length)]
+    const snakeStartY = allY[Math.floor(Math.random() * allY.length)]
+
+    console.log(snakeStartX, snakeStartY)
 
     const snakeBodyPoints = [
-        [xMax / 2 / ratio, yMax / 2 / ratio],
-        [xMax / 2 / ratio + snakeSize, yMax / 2 / ratio],
+        [snakeStartX, snakeStartY],
+        [snakeStartX + SNAKE_SIZE, snakeStartY],
+        // [xMax / 2 / RATIO + SNAKE_SIZE * 2, yMax / 2 / RATIO],
+        // [xMax / 2 / RATIO + SNAKE_SIZE * 3, yMax / 2 / RATIO],
+        // [xMax / 2 / RATIO + SNAKE_SIZE * 4, yMax / 2 / RATIO],
+        // [xMax / 2 / RATIO + SNAKE_SIZE * 5, yMax / 2 / RATIO],
+        // [xMax / 2 / RATIO + SNAKE_SIZE * 6, yMax / 2 / RATIO],
+        // [xMax / 2 / RATIO + SNAKE_SIZE * 7, yMax / 2 / RATIO],
+        // [xMax / 2 / RATIO + SNAKE_SIZE * 8, yMax / 2 / RATIO],
+        // [xMax / 2 / RATIO + SNAKE_SIZE * 9, yMax / 2 / RATIO],
+        // [xMax / 2 / RATIO + SNAKE_SIZE * 10, yMax / 2 / RATIO],
     ]
 
-    let step = 0
+    const strawberryX = allX[Math.floor(Math.random() * allX.length)]
+    const strawberryY = allY[Math.floor(Math.random() * allY.length)]
 
-    const interval = setInterval(() => {
+    // ctx.fillStyle = 'white'
+    // ctx.fillRect(strawberryX, strawberryY, SNAKE_SIZE, SNAKE_SIZE)
+    ctx.font = SNAKE_SIZE + 'px Helvetica'
+    ctx.fillText('🍓', strawberryX, strawberryY + SNAKE_SIZE - 6)
+
+    setInterval(() => {
+        let previousPoint = null
+
         for (let bodyPontIndex = 0; bodyPontIndex < snakeBodyPoints.length; bodyPontIndex++) {
+            let newX, newY
             const [x, y] = snakeBodyPoints[bodyPontIndex]
 
-            let newX = x
-            let newY = y
+            if (bodyPontIndex === 0) {
+                newX = x
+                newY = y
 
-            ctx.clearRect(x, y, snakeSize, snakeSize)
-
-            if (direction === 'left' || direction === 'right') {
-                if (direction === 'left') {
-                    newX = x - snakeSize
+                if (direction === 'left' || direction === 'right') {
+                    if (direction === 'left') {
+                        newX = (x - SNAKE_SIZE)
+                    } else {
+                        newX = (x + SNAKE_SIZE)
+                    }
                 } else {
-                    newX = x + snakeSize
+                    if (direction === 'top') {
+                        newY = (y - SNAKE_SIZE)
+                    } else {
+                        newY = (y + SNAKE_SIZE)
+                    }
+                }
+
+                if (newX < 0) {
+                    newX = canvas.width / RATIO - SNAKE_SIZE
+                } else if (newX > canvas.width / RATIO - SNAKE_SIZE) {
+                    newX = 0
+                }
+
+                if (newY < 0) {
+                    newY = canvas.height / RATIO - SNAKE_SIZE
+                } else if (newY > canvas.height / RATIO - SNAKE_SIZE) {
+                    newY = 0
                 }
             } else {
-                if (direction === 'top') {
-                    newY = y - snakeSize
-                } else {
-                    newY = y + snakeSize
-                }
+                newX = previousPoint[0]
+                newY = previousPoint[1]
             }
+            previousPoint = snakeBodyPoints[bodyPontIndex]
 
-            // if (bodyPontIndex !== 0 & step === 0) {
-            //   newX = newX + snakeSpace;
-            // }
-
-            if (newX < 0) {
-                newX = canvas.width - snakeSize
-            } else if (newX > canvas.width) {
-                newX = 0 + snakeSize
-            }
-
-            if (newY < 0) {
-                newY = canvas.height - snakeSize
-            } else if (newY > canvas.height) {
-                newY = 0 + snakeSize
-            }
+            ctx.clearRect(x, y, SNAKE_SIZE, SNAKE_SIZE)
 
             ctx.fillStyle = 'red'
-            ctx.fillRect(newX, newY, snakeSize, snakeSize)
+            ctx.fillRect(newX, newY, SNAKE_SIZE, SNAKE_SIZE)
 
             snakeBodyPoints[bodyPontIndex] = [newX, newY]
         }
@@ -113,9 +223,8 @@
         // ctx.fillRect(snakeBodyPoints[0][0] - 1, snakeBodyPoints[0][1] + 6, 1, 1);
         // ctx.closePath();
 
-        debug()
-        ++step
-    }, 20000)
+        // debug()
+    }, SPEED)
 
 
     // ctx.beginPath();
