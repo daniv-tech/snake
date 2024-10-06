@@ -17,6 +17,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
 
         canvas {
@@ -91,7 +92,7 @@
     const ctx = canvas.getContext('2d')
 
     /* BLOCK VARIABLES */
-    const SPEED = 500
+    const SPEED = 200
     const SNAKE_SIZE = 50
     const WINDOW_SIZE = 500
     const RATIO = 2 //window.devicePixelRatio;
@@ -129,6 +130,35 @@
                 break
         }
     }
+
+    let touchStartX = 0
+    let touchStartY = 0
+
+    document.addEventListener('touchstart', function (event) {
+        touchStartX = event.touches[0].clientX
+        touchStartY = event.touches[0].clientY
+    }, false)
+
+    document.addEventListener('touchmove', function (event) {
+        let touch = event.touches[0]
+        let deltaX = touch.clientX - touchStartX
+        let deltaY = touch.clientY - touchStartY
+
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (deltaX > 0) {
+                direction = 'right'
+            } else {
+                direction = 'left'
+            }
+        } else {
+            if (deltaY > 0) {
+                direction = 'bottom'
+            } else {
+                direction = 'top'
+            }
+        }
+        event.preventDefault()
+    }, false)
 
     const allX = Array.from({length: xMax / RATIO / SNAKE_SIZE}, (_, i) => i * SNAKE_SIZE)
     const allY = Array.from({length: yMax / RATIO / SNAKE_SIZE}, (_, i) => i * SNAKE_SIZE)
