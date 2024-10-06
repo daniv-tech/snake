@@ -10,14 +10,53 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-reboot.min.css" rel="stylesheet"/>
+
     <style>
         body {
+            font-family: "Pixelify Sans", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 500;
+            font-style: normal;
             background: #2c2c2c;
-            height: 100vh;
+            height: 100dvh;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
             overflow: hidden;
+            align-content: space-around;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        header h1 {
+            text-transform: uppercase;
+            background: #CA4246;
+            background-color: #CA4246;
+            background: conic-gradient(
+                #CA4246 16.666%,
+                #E16541 16.666%,
+                #E16541 33.333%,
+                #F18F43 33.333%,
+                #F18F43 50%,
+                #8B9862 50%,
+                #8B9862 66.666%,
+                #476098 66.666%,
+                #476098 83.333%,
+                #A7489B 83.333%);
+            background-size: 57%;
+            background-repeat: repeat;
+
+            /* Use the text as a mask for the background. */
+            /* This will show the gradient as a text color rather than element bg. */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+
+            /* Animate the text when loading the element. */
+            /* This animates it on page load and when hovering out. */
+            animation: rainbow-text-animation-rev 0.5s ease forwards;
         }
 
         canvas {
@@ -46,6 +85,12 @@
 
         .animated-box.in:after {
             animation: frame-enter 1s forwards ease-in-out reverse, gradient-animation 4s ease-in-out infinite;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         /* motion */
@@ -81,12 +126,15 @@
     </style>
 </head>
 <body>
-<img src="snake-qr.png" alt="Snake QR Code" style="position: absolute; top: 0; right: 0; width: 100px; height: 100px;"/>
+<header>
+    <h1>Snake</h1>
+    <img src="snake-qr.png" alt="Snake QR Code" style="align-self: end;width: 100px; height: 100px;"/>
+</header>
+
 <div class="animated-box in">
     <canvas height="500" width="500" id="snake"></canvas>
 </div>
 
-<div id="debug"></div>
 <script>
     const canvas = document.getElementById('snake')
     const ctx = canvas.getContext('2d')
@@ -183,8 +231,8 @@
         // [xMax / 2 / RATIO + SNAKE_SIZE * 10, yMax / 2 / RATIO],
     ]
 
-    const strawberryX = allX[Math.floor(Math.random() * allX.length)]
-    const strawberryY = allY[Math.floor(Math.random() * allY.length)]
+    let strawberryX = allX[Math.floor(Math.random() * allX.length)]
+    let strawberryY = allY[Math.floor(Math.random() * allY.length)]
 
     // ctx.fillStyle = 'white'
     // ctx.fillRect(strawberryX, strawberryY, SNAKE_SIZE, SNAKE_SIZE)
@@ -234,7 +282,12 @@
             previousPoint = snakeBodyPoints[bodyPontIndex]
 
             ctx.clearRect(x, y, SNAKE_SIZE, SNAKE_SIZE)
-
+            if (newX === strawberryX && newY === strawberryY) {
+                // snakeBodyPoints.push([newX, newY])
+                strawberryX = allX[Math.floor(Math.random() * allX.length)]
+                strawberryY = allY[Math.floor(Math.random() * allY.length)]
+                ctx.fillText('🍓', strawberryX, strawberryY + SNAKE_SIZE - 6)
+            }
             ctx.fillStyle = 'red'
             ctx.fillRect(newX, newY, SNAKE_SIZE, SNAKE_SIZE)
 
