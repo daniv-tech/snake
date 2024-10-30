@@ -65,8 +65,10 @@
         }
 
         .animated-box {
+            width: fit-content;
             position: relative;
             border-radius: 4px;
+            align-self: center;
             overflow: hidden;
         }
 
@@ -131,9 +133,9 @@
     <img src="snake-qr.png" alt="Snake QR Code" style="align-self: end;width: 100px; height: 100px;"/>
 </header>
 
-<div class="animated-box in">
+<main class="animated-box in">
     <canvas height="500" width="500" id="snake"></canvas>
-</div>
+</main>
 
 <script>
     const canvas = document.getElementById('snake')
@@ -240,7 +242,7 @@
     ctx.fillText('🍓', strawberryX, strawberryY + SNAKE_SIZE - 6)
 
     setInterval(() => {
-        let previousPoint = null
+        let previousPoint = addNewBlock = null
 
         for (let bodyPontIndex = 0; bodyPontIndex < snakeBodyPoints.length; bodyPontIndex++) {
             let newX, newY
@@ -283,15 +285,25 @@
 
             ctx.clearRect(x, y, SNAKE_SIZE, SNAKE_SIZE)
             if (newX === strawberryX && newY === strawberryY) {
-                // snakeBodyPoints.push([newX, newY])
-                strawberryX = allX[Math.floor(Math.random() * allX.length)]
-                strawberryY = allY[Math.floor(Math.random() * allY.length)]
+                // 1. augmenter le corps du serpent
+                addNewBlock = true
+
+                // 2. placer à nouveau la fraise
+                strawberryX = allX.filter(x => x !== newX)[Math.floor(Math.random() * (allX.length - 1))]
+                strawberryY = allY.filter(y => y !== newY)[Math.floor(Math.random() * (allY.length - 1))]
+
+                console.log([strawberryX, strawberryY])
+
                 ctx.fillText('🍓', strawberryX, strawberryY + SNAKE_SIZE - 6)
             }
             ctx.fillStyle = 'red'
             ctx.fillRect(newX, newY, SNAKE_SIZE, SNAKE_SIZE)
 
             snakeBodyPoints[bodyPontIndex] = [newX, newY]
+        }
+
+        if (addNewBlock) {
+            snakeBodyPoints.push(previousPoint)
         }
 
         // ctx.beginPath();
