@@ -212,12 +212,16 @@
 
     const allX = Array.from({length: xMax / RATIO / SNAKE_SIZE}, (_, i) => i * SNAKE_SIZE)
     const allY = Array.from({length: yMax / RATIO / SNAKE_SIZE}, (_, i) => i * SNAKE_SIZE)
+    const matrix = []
 
-    console.log(allX, allY)
+    for (let i = 0; i < allX.length; ++i) {
+        for (let j = 0; j < allY.length; ++j) {
+            matrix.push([allX[i], allY[j]])
+        }
+    }
+
     const snakeStartX = allX[Math.floor(Math.random() * allX.length)]
     const snakeStartY = allY[Math.floor(Math.random() * allY.length)]
-
-    console.log(snakeStartX, snakeStartY)
 
     const snakeBodyPoints = [
         [snakeStartX, snakeStartY],
@@ -284,15 +288,16 @@
             previousPoint = snakeBodyPoints[bodyPontIndex]
 
             ctx.clearRect(x, y, SNAKE_SIZE, SNAKE_SIZE)
+
             if (newX === strawberryX && newY === strawberryY) {
-                // 1. augmenter le corps du serpent
                 addNewBlock = true
 
-                // 2. placer à nouveau la fraise
-                strawberryX = allX.filter(x => x !== newX)[Math.floor(Math.random() * (allX.length - 1))]
-                strawberryY = allY.filter(y => y !== newY)[Math.floor(Math.random() * (allY.length - 1))]
+                const usedCoords = snakeBodyPoints.concat([[newX, newY]]).map(coords => coords.join('x'))
+                const availableCoordinates = matrix.map(coords => coords.join('x')).filter((coords) => !usedCoords.includes(coords)).map(coords => coords.split('x').map(i => Number.parseInt(i)))
+                const newStrawberryCoords = availableCoordinates[Math.floor(Math.random() * availableCoordinates.length)]
 
-                console.log([strawberryX, strawberryY])
+                strawberryX = newStrawberryCoords[0]
+                strawberryY = newStrawberryCoords[1]
 
                 ctx.fillText('🍓', strawberryX, strawberryY + SNAKE_SIZE - 6)
             }
