@@ -167,16 +167,16 @@
         e.preventDefault()
         switch (e.keyCode) {
             case 37:
-                direction = 'left'
+                direction = direction !== 'right' ? 'left' : 'right'
                 break
             case 38:
-                direction = 'top'
+                direction = direction !== 'bottom' ? 'top' : 'bottom'
                 break
             case 39:
-                direction = 'right'
+                direction = direction !== 'left' ? 'right' : 'left'
                 break
             case 40:
-                direction = 'bottom'
+                direction = direction !== 'top' ? 'bottom' : 'top'
                 break
         }
     }
@@ -196,15 +196,15 @@
 
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
             if (deltaX > 0) {
-                direction = 'right'
+                direction = direction !== 'left' ? 'right' : 'left'
             } else {
-                direction = 'left'
+                direction = direction !== 'right' ? 'left' : 'right'
             }
         } else {
             if (deltaY > 0) {
-                direction = 'bottom'
+                direction = direction !== 'top' ? 'bottom' : 'top'
             } else {
-                direction = 'top'
+                direction = direction !== 'bottom' ? 'top' : 'bottom'
             }
         }
         event.preventDefault()
@@ -226,15 +226,6 @@
     const snakeBodyPoints = [
         [snakeStartX, snakeStartY],
         [snakeStartX + SNAKE_SIZE, snakeStartY],
-        // [xMax / 2 / RATIO + SNAKE_SIZE * 2, yMax / 2 / RATIO],
-        // [xMax / 2 / RATIO + SNAKE_SIZE * 3, yMax / 2 / RATIO],
-        // [xMax / 2 / RATIO + SNAKE_SIZE * 4, yMax / 2 / RATIO],
-        // [xMax / 2 / RATIO + SNAKE_SIZE * 5, yMax / 2 / RATIO],
-        // [xMax / 2 / RATIO + SNAKE_SIZE * 6, yMax / 2 / RATIO],
-        // [xMax / 2 / RATIO + SNAKE_SIZE * 7, yMax / 2 / RATIO],
-        // [xMax / 2 / RATIO + SNAKE_SIZE * 8, yMax / 2 / RATIO],
-        // [xMax / 2 / RATIO + SNAKE_SIZE * 9, yMax / 2 / RATIO],
-        // [xMax / 2 / RATIO + SNAKE_SIZE * 10, yMax / 2 / RATIO],
     ]
 
     let strawberryX = allX[Math.floor(Math.random() * allX.length)]
@@ -244,6 +235,10 @@
     // ctx.fillRect(strawberryX, strawberryY, SNAKE_SIZE, SNAKE_SIZE)
     ctx.font = SNAKE_SIZE + 'px Helvetica'
     ctx.fillText('🍓', strawberryX, strawberryY + SNAKE_SIZE - 6)
+
+    const checkDuplicatePoints = (points, x, y) => {
+        return points.some(([snakeX, snakeY]) => snakeX === x && snakeY === y)
+    }
 
     setInterval(() => {
         let previousPoint = addNewBlock = null
@@ -287,8 +282,6 @@
             }
             previousPoint = snakeBodyPoints[bodyPontIndex]
 
-            ctx.clearRect(x, y, SNAKE_SIZE, SNAKE_SIZE)
-
             if (newX === strawberryX && newY === strawberryY) {
                 addNewBlock = true
 
@@ -301,8 +294,17 @@
 
                 ctx.fillText('🍓', strawberryX, strawberryY + SNAKE_SIZE - 6)
             }
-            ctx.fillStyle = 'red'
+
+            const isGameOver = checkDuplicatePoints(snakeBodyPoints, newX, newY)
+
+            ctx.fillStyle = isGameOver ? '#00DAE1' : 'red'
             ctx.fillRect(newX, newY, SNAKE_SIZE, SNAKE_SIZE)
+            ctx.clearRect(x, y, SNAKE_SIZE, SNAKE_SIZE)
+
+            if (isGameOver) {
+                // clearInterval()
+                // alert('Game Over')
+            }
 
             snakeBodyPoints[bodyPontIndex] = [newX, newY]
         }
@@ -325,7 +327,6 @@
 
         // debug()
     }, SPEED)
-
 
     // ctx.beginPath();
     // ctx.arc(151, 152, 2, 0, Math.PI * 2);
